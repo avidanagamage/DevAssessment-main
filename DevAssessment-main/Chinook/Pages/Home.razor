@@ -1,0 +1,66 @@
+﻿@page "/"
+@attribute [Authorize]
+
+@using Chinook.Models
+@using Chinook.Services
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>Index</PageTitle>
+
+<h1>Artists</h1>
+
+<form>
+    <input type="search" @oninput="SearchArtists" @bind="SearchTerm" />
+    <button type="submit">Search</button>
+</form>
+
+@if (Artists == null)
+{
+    <Loading />
+}
+else
+{
+    <table class="table table-striped table-hover table-sm">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Number of albums</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var artist in Artists)
+            {
+                <tr>
+                    <td><a href="Artist/@artist.ArtistId">@artist.Name</a></td>
+                    <td>@artist.Albums.Count()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Artist>? Artists;
+    [Inject] HomeService HomeService { get; set; }
+    private string SearchTerm = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await InvokeAsync(StateHasChanged);
+
+        await LoadArtists();
+    }
+    private async Task LoadArtists()
+    {
+        Artists = await HomeService.GetArtists(SearchTerm);
+    }
+    private async Task SearchArtists(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value.ToString();
+        await LoadArtists();
+    }
+    public async Task<List<Album>> GetAlbumsForArtist(int artistId)
+    {
+        return await HomeService.GetAlbumsForArtist(artistId);
+    }
+}
