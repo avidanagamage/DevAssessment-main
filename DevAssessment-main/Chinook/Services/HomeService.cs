@@ -1,9 +1,10 @@
-﻿using Chinook.Models;
+﻿using Chinook.Interfaces;
+using Chinook.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chinook.Services
 {
-    public class HomeService
+    public class HomeService: IHomeService
     {
         private readonly ChinookContext _dbContext;
 

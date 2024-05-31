@@ -1,9 +1,11 @@
-﻿using Chinook.Models;
+﻿using Chinook.Interfaces;
+using Chinook.Models;
+using Chinook.Utility;
 using Microsoft.EntityFrameworkCore;
 
 namespace Chinook.Services
 {
-    public class PlayListService
+    public class PlayListService: IPlaylistService
     {
         private readonly ChinookContext _dbContext;
 
@@ -53,13 +55,13 @@ namespace Chinook.Services
             var track = await _dbContext.Tracks.FirstOrDefaultAsync(x => x.TrackId == trackId);
             var favoritePlaylist = await _dbContext.Playlists
                 .Include(p => p.UserPlaylists)
-                .FirstOrDefaultAsync(p => p.Name == "My favorite tracks" && p.UserPlaylists.Any(up => up.UserId == userId));
+                .FirstOrDefaultAsync(p => p.Name == Constants.FavoritePlaylistName && p.UserPlaylists.Any(up => up.UserId == userId));
 
             if (favoritePlaylist == null)
             {
                 favoritePlaylist = new Models.Playlist
                 {
-                    Name = "My favorite tracks",
+                    Name = Constants.FavoritePlaylistName,
                     Tracks = new List<Track> { track }
 
                 };
@@ -84,7 +86,7 @@ namespace Chinook.Services
         public async Task UnfavoriteTrack(long trackId, string userId)
         {
             var userPlaylists = await GetUserPlaylistsAsync(userId);
-            var favoritePlaylist = userPlaylists.FirstOrDefault(up => up.Playlist.Name == "My favorite tracks");
+            var favoritePlaylist = userPlaylists.FirstOrDefault(up => up.Playlist.Name == Constants.FavoritePlaylistName);
 
             if (favoritePlaylist != null)
             {

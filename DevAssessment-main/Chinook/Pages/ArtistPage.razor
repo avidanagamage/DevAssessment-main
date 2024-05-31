@@ -1,6 +1,7 @@
 ﻿@page "/artist/{ArtistId:long}"
 @attribute [Authorize]
 
+@using Chinook.Interfaces
 @using Chinook.Models
 @using Chinook.ClientModels
 @using Chinook.Services
@@ -88,7 +89,7 @@ else
 @code {
     [Parameter] public long ArtistId { get; set; }
     [CascadingParameter] private Task<AuthenticationState> authenticationState { get; set; }
-    [Inject] ArtistService artistService { get; set; }
+    [Inject] IArtistService artistService { get; set; }
     private Modal PlaylistDialog { get; set; }
 
     private Artist Artist;

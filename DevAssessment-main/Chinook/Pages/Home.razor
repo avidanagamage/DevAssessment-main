@@ -1,6 +1,7 @@
 ﻿@page "/"
 @attribute [Authorize]
 
+@using Chinook.Interfaces
 @using Chinook.Models
 @using Chinook.Services
 @using Microsoft.EntityFrameworkCore
@@ -41,7 +42,7 @@ else
 
 @code {
     private List<Artist>? Artists;
-    [Inject] HomeService HomeService { get; set; }
+    [Inject] IHomeService HomeService { get; set; }
     private string SearchTerm = "";
 
     protected override async Task OnInitializedAsync()

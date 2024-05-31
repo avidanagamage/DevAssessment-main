@@ -1,5 +1,6 @@
 using Chinook;
 using Chinook.Areas.Identity;
+using Chinook.Interfaces;
 using Chinook.Models;
 using Chinook.Services;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -15,9 +16,9 @@ builder.Services.AddDefaultIdentity<ChinookUser>(options => options.SignIn.Requi
     .AddEntityFrameworkStores<ChinookContext>();
 
 //Register services
-builder.Services.AddScoped<ArtistService>();
-builder.Services.AddScoped<PlayListService>();
-builder.Services.AddScoped<HomeService>();
+builder.Services.AddTransient<IArtistService, ArtistService>();
+builder.Services.AddTransient<IPlaylistService, PlayListService>();
+builder.Services.AddTransient<IHomeService, HomeService>();
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
