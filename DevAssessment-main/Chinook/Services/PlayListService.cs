@@ -163,7 +163,7 @@ namespace Chinook.Services
 
         public async Task<List<UserPlaylist>> GetUserPlaylist(string userId)
         {
-            _userPlaylists = _dbContext.UserPlaylists.Include(a => a.Playlist).ToList();
+            _userPlaylists = await _dbContext.UserPlaylists.Include(a => a.Playlist).Where(x=> x.UserId == userId).ToListAsync();
             return _userPlaylists;
         }
 
