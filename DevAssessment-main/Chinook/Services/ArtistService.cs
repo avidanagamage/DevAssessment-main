@@ -48,18 +48,20 @@ namespace Chinook.Services
 
             if (favoritePlaylist == null)
             {
+                var totalPlayListCount = _dbContext.Playlists.ToList().Count;
+                
                 favoritePlaylist = new Models.Playlist
                 {
                     Name = Constants.FavoritePlaylistName,
-                    Tracks = new List<Track> { track }
-
-                };
+                    Tracks = new List<Track> { track },
+                    PlaylistId = totalPlayListCount + 1
+            };
                 var userPlaylist = new UserPlaylist
                 {
                     UserId = userId,
                     Playlist = favoritePlaylist
                 };
-
+                
                 await _dbContext.UserPlaylists.AddAsync(userPlaylist);
             }
 
