@@ -73,18 +73,26 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        CurrentUserId = await GetUserId();
-
-        Playlist = await playListService.GetPlaylist(PlaylistId, CurrentUserId);
+        await LoadPlaylistData();
 
         if (Playlist == null)
         {
-            // Handle the case where the playlist is not found
-            // For example, you could redirect the user to an error page or display a message
             InfoMessage = "Playlist not found.";
         }
     }
-
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadPlaylistData();
+        if (Playlist == null)
+        {
+            InfoMessage = "Playlist not found.";
+        }
+    }
+    private async Task LoadPlaylistData()
+    {
+        CurrentUserId = await GetUserId();
+        Playlist = await playListService.GetPlaylist(PlaylistId, CurrentUserId);
+    }
     private async Task<string> GetUserId()
     {
         var user = (await authenticationState).User;
