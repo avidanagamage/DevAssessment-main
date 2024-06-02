@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Chinook.Models
 {
@@ -9,7 +10,6 @@ namespace Chinook.Models
         {
             Tracks = new HashSet<Track>();
         }
-
         public long PlaylistId { get; set; }
         public string? Name { get; set; }
 

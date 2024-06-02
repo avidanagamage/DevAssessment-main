@@ -70,15 +70,16 @@ else
 
         <div class="mb-2">
             <label for="ExistingPlaylist">Add to existing playlist</label>
-            <select class="form-control" id="ExistingPlaylist">
-                <option>Playlist 1</option>
-                <option>Playlist 2</option>
-                <option>Playlist 3</option>
+            <select class="form-control" id="ExistingPlaylist" @bind="ExistingPlaylistValue">
+                @foreach (var playlist in Playlists)
+                {
+                    <option id="@playlist.PlaylistId" value="@playlist.Name">@playlist.Name</option>
+                }
             </select>
         </div>
         <div class="mb-2">
             <label for="NewPlaylist">Create new playlist</label>
-            <input type="text" id="NewPlaylist" class="form-control" placeholder="Name for the new playlist">
+            <input type="text" id="NewPlaylist" class="form-control" @bind="NewPlaylistValue" placeholder="Name for the new playlist">
         </div>
     </Body>
     <Footer>
@@ -90,13 +91,16 @@ else
     [Parameter] public long ArtistId { get; set; }
     [CascadingParameter] private Task<AuthenticationState> authenticationState { get; set; }
     [Inject] IArtistService artistService { get; set; }
+    [Inject] IPlaylistService playListService { get; set; }
     private Modal PlaylistDialog { get; set; }
-
+    private string ExistingPlaylistValue { get; set; }
+    private string NewPlaylistValue { get; set; }
     private Artist Artist;
     private List<PlaylistTrack> Tracks;
     private PlaylistTrack SelectedTrack;
     private string InfoMessage;
     private string CurrentUserId;
+    private List<Models.Playlist> Playlists { get; set; } = new List<Models.Playlist>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -104,6 +108,7 @@ else
         CurrentUserId = await GetUserId();
         Artist = await artistService.GetArtistAsync(ArtistId);
         Tracks = await artistService.GetTracksAsync(ArtistId, CurrentUserId);
+        Playlists = await playListService.GetPlaylistsAsync(CurrentUserId);
     }
 
     private async Task<string> GetUserId()
@@ -136,14 +141,28 @@ else
         PlaylistDialog.Open();
     }
 
-    private void AddTrackToPlaylist()
+    private async void AddTrackToPlaylist()
     {
-        // TODO
         CloseInfoMessage();
-        InfoMessage = $"Track {Artist.Name} - {SelectedTrack.AlbumTitle} - {SelectedTrack.TrackName} added to playlist {{playlist name}}.";
+
+        string selectedPlaylistName = NewPlaylistValue;
+        if (string.IsNullOrWhiteSpace(selectedPlaylistName))
+        {
+            selectedPlaylistName = ExistingPlaylistValue;
+        }
+
+        Models.Playlist existingPlaylist = await playListService.GetPlaylistByNameAsync(selectedPlaylistName);
+        if (existingPlaylist == null)
+        {
+            existingPlaylist = new Models.Playlist { Name = selectedPlaylistName };
+            await playListService.CreatePlaylistAsync(existingPlaylist);
+        }
+
+        await playListService.AddTrackToPlaylistAsync(existingPlaylist, SelectedTrack.TrackId, CurrentUserId);
+
+        InfoMessage = $"Track {Artist.Name} - {SelectedTrack.AlbumTitle} - {SelectedTrack.TrackName} added to playlist {selectedPlaylistName}.";
         PlaylistDialog.Close();
     }
-
     private void CloseInfoMessage()
     {
         InfoMessage = "";
